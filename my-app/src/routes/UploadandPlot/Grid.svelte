@@ -19,18 +19,15 @@
     });
 
 
-    //On header update
     function onHeaderUpdate(e, i){
         data.set_header(i, e.target.value)
     }
 
-    //On cell update
     function onCellUpdate(e, x, y){
         data.set_cell(new Coordinate(x, y), e.target.value)
     }
 
-    //Get cell
-    function getInfo(x, y){
+    function getInfo(){
         console.log(data.height)
         console.log(data.width)
     }
@@ -81,9 +78,9 @@
     }
 
     function delete_handle(){
-        console.log(drag_start)
-        console.log(drag_end)
         data.delete_area(drag_start, drag_end)
+        data = data
+        keepHighlightedBool = false
     }
 </script>
 
@@ -100,30 +97,35 @@
     <button on:click={delete_handle}>Delete</button>
 </div>
 
-<!--Create grid div-->
-<div class="grid" style="grid-template-rows: repeat({grid[0]}, auto); grid-template-columns:repeat({grid[1]}, auto)">
-    <!--    Display each header in the grid-->
-    {#each {length: grid[1]} as _, i (i)}
-        <input type="text" class="header" on:change={()=>onHeaderUpdate(event, i)}>
-    {/each}
-
-    <!--    Display each cell in the grid-->
-    {#each {length: grid[0]} as _, i (i)}
-        {#each {length: grid[1]} as _, j (j)}
-            <input type="text" class="{(dragBool &&
-                                        (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
-                                        && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
-                                        && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
-
-                                        ||
-                                        (keepHighlightedBool
-                                        && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
-                                        && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
-
-                                         ? 'highlight-cell' : 'cell'}" on:click={()=>console.log(data.get_cell(new Coordinate(i,j)))} on:change={()=>onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)}>
+{#if !data}
+    Loading..
+{:else}
+    <!--Create grid div-->
+    <div class="grid" style="grid-template-rows: repeat({grid[0]}, auto); grid-template-columns:repeat({grid[1]}, auto)">
+        <!--    Display each header in the grid-->
+        {#each {length: grid[1]} as _, i (i)}
+            <input type="text" class="header" on:change={()=>onHeaderUpdate(event, i)} value={data.get_header(i)}>
         {/each}
-    {/each}
-</div>
+
+        <!--    Display each cell in the grid-->
+        {#each {length: grid[0]} as _, i (i)}
+            {#each {length: grid[1]} as _, j (j)}
+                <input type="text" class="{(dragBool &&
+                                            (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
+                                            && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
+                                            && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
+
+                                            ||
+                                            (keepHighlightedBool
+                                            && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
+                                            && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
+
+                                             ? 'highlight-cell' : 'cell'}" on:click={()=>console.log(data.get_cell(new Coordinate(i,j)))} on:change={()=>onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)} value={data.get_cell(new Coordinate(i,j))} >
+            {/each}
+        {/each}
+    </div>
+
+{/if}
 
 
 <style>

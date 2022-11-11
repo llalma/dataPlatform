@@ -1,6 +1,3 @@
-// #[macro_use]
-// extern crate fstrings;
-
 extern crate wasm_bindgen;
 
 use wasm_bindgen::prelude::*;
@@ -11,19 +8,13 @@ use std::cmp;
 // use polars_core::prelude::*;
 // use polars_lazy::prelude::*;
 
+//Created Packages
+#[path = "Cell.rs"] mod Cell;
+#[path = "Coordinate.rs"] mod Coordinate;
+
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-/*
-Enums
-*/
-#[wasm_bindgen]
-#[derive(Clone)]
-pub enum DataType {
-    String,
-    Integer,
-    Boolean
-}
 
 /*
 Structs
@@ -32,9 +23,8 @@ Structs
 pub struct Grid {
     height: usize,
     width: usize,
-    default_value: Cell,
     headers: Vec<String>,
-    data: Vec<Vec<Cell>>
+    data: Vec<Vec<Cell::Cell>>
 }
 
 #[wasm_bindgen]
@@ -44,9 +34,8 @@ impl Grid {
         Self {
             height: size_x,
             width: size_y,
-            default_value: Cell{data_type: DataType::String, data:"".to_string()},
-            headers: vec!["".to_string(); size_y],
-            data : vec![vec![Cell{data_type: DataType::String, data:"".to_string()}; size_y]; size_x],
+            headers: (0..size_y).map(|v| format!("Header_{0}", v.to_string())).collect(),
+            data : vec![vec![Cell::Cell::new(); size_y]; size_x],
         }
     }
 
@@ -56,14 +45,14 @@ impl Grid {
         if (&size_y - &self.width) > 0{
             self.width =  size_y.clone();
             for x in 0..&self.width+1 {
-                self.data[x].resize(size_y.clone(), self.default_value.clone());
+                self.data[x].resize(size_y.clone(), Cell::Cell::new());
             }
         }
 
         // Increase X vectors
         if ( &size_x - &self.height) > 0{
             self.height = size_x.clone();
-            let x = vec![self.default_value.clone(); size_y];
+            let x = vec![Cell::Cell::new(); size_y];
             self.data.resize(size_x, x);
         }
 
@@ -82,24 +71,24 @@ impl Grid {
         self.headers[index] = data
     }
 
-    pub fn get_header(self, index: usize) -> String {
-        return format!("header: {0}", self.headers[index].to_string())
+    pub fn get_header(&self, index: usize) -> String {
+        return format!("{0}", self.headers[index].to_string())
     }
 
-    pub fn set_cell(&mut self, coord:Coordinate, data:String){
-        self.data[coord.x][coord.y].set_data(DataType::String, data)
+    pub fn set_cell(&mut self, coord:Coordinate::Coordinate, data:String){
+        self.data[coord.x()][coord.y()].set_data(Cell::DataType::String, data)
     }
 
-    pub fn get_cell(&self, coord:Coordinate) -> String{
-        return self.data[coord.x][coord.y].get_data()
+    pub fn get_cell(&self, coord:Coordinate::Coordinate) -> String{
+        return self.data[coord.x()][coord.y()].get_data()
     }
 
-    pub fn get_dragged_cells(&self, start: &Coordinate, end: &Coordinate) -> String{
+    pub fn get_dragged_cells(&self, start: &Coordinate::Coordinate, end: &Coordinate::Coordinate) -> String{
         //Get corners of highlighted box
-        let min_x = cmp::min(&start.x, &end.x).clone();
-        let max_x = cmp::max(&start.x, &end.x).clone()+1;
-        let min_y = cmp::min(&start.y, &end.y).clone();
-        let max_y = cmp::max(&start.y, &end.y).clone()+1;
+        let min_x = cmp::min(&start.x(), &end.x()).clone();
+        let max_x = cmp::max(&start.x(), &end.x()).clone()+1;
+        let min_y = cmp::min(&start.y(), &end.y()).clone();
+        let max_y = cmp::max(&start.y(), &end.y()).clone()+1;
 
         let mut csv_data: String = "".to_owned();
 
@@ -121,13 +110,13 @@ impl Grid {
         return csv_data.to_string()
     }
 
-    pub fn delete_area(&mut self, start: &Coordinate, end: &Coordinate){
+    pub fn delete_area(&mut self, start: &Coordinate::Coordinate, end: &Coordinate::Coordinate){
 
         //Get corners of highlighted box
-        let min_x = cmp::min(&start.x, &end.x).clone();
-        let max_x = cmp::max(&start.x, &end.x).clone()+1;
-        let min_y = cmp::min(&start.y, &end.y).clone();
-        let max_y = cmp::max(&start.y, &end.y).clone()+1;
+        let min_x = cmp::min(&start.x(), &end.x()).clone();
+        let max_x = cmp::max(&start.x(), &end.x()).clone()+1;
+        let min_y = cmp::min(&start.y(), &end.y()).clone();
+        let max_y = cmp::max(&start.y(), &end.y()).clone()+1;
 
         // For each cell in the area reset the cell
         for x in min_x..max_x{
@@ -145,79 +134,9 @@ impl Grid {
             .map(|r| r
                 .clone()
                 .into_iter()
-                .map(|c| format!("\"{0}\"", c.data))
+                .map(|c| format!("\"{0}\"", c.get_data()))
                 .collect::<Vec<String>>().join(","))
             .collect::<Vec<String>>().join("\n");
     }
 }
 
-#[wasm_bindgen]
-pub struct Coordinate {
-    x : usize,
-    y : usize
-}
-
-#[wasm_bindgen]
-impl Coordinate {
-    #[wasm_bindgen(constructor)]
-    pub fn new(x: usize, y: usize ) -> Self {
-        Self {
-            x,
-            y
-        }
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn x(&self) -> usize {
-        return self.x.clone()
-    }
-    #[wasm_bindgen(getter)]
-    pub fn y(&self) -> usize {
-        return self.y.clone()
-    }
-
-    fn to_string(&self) -> String{
-        //Get coordinate values in a simple string
-        return format!("x: {0}, y: {1}", &self.x, &self.y)
-    }
-}
-
-#[wasm_bindgen]
-#[derive(Clone)]
-struct Cell {
-    data_type: DataType,
-    data: String //Should I make this a byte array?
-}
-
-#[wasm_bindgen]
-impl Cell {
-
-   fn is_empty(&self) -> bool {
-       return &self.data == ""
-   }
-
-    fn get_data(&self) -> String {
-        return format!("{0}", &self.data)
-    }
-
-    fn set_data(&mut self, data_type: DataType, data: String){
-        self.data_type = data_type;
-        self.data = data;
-    }
-
-    fn reset_cell(&mut self){
-        self.data_type = DataType::String;
-        self.data = "".to_string();
-    }
-}
-
-
-/*
-Functions
-*/
-
-#[wasm_bindgen]
-//pub fn update_cell(location: Coordinate, dataType: DataType, data: &vec<u8>]){
-pub fn update_cell(coords: Coordinate){
-    console::log_1(&coords.to_string().into());
-}

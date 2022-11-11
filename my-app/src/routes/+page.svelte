@@ -1,6 +1,6 @@
 <script>
 
-const redirects = {Home: "/", KNN: "/KNN", BasicDataViz: "/BasicDataVisulisation", UploadandPlot: "/UploadandPlot"}
+const redirects = {Home: "/", UploadandPlot: "/UploadandPlot"}
 
 </script>
 
