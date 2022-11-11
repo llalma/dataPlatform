@@ -1,0 +1,1 @@
+C:\Users\llalma\Documents\dataAnalyticsPlatform\my-app\rustFunctions\Grid\target\wasm32-unknown-unknown\release\libGrid.rlib: C:\Users\llalma\Documents\dataAnalyticsPlatform\my-app\rustFunctions\Grid\src\lib.rs

@@ -1,0 +1,11 @@
+C:\Users\llalma\Documents\dataAnalyticsPlatform\my-app\rustFunctions\Grid\target\wasm32-unknown-unknown\release\deps\getrandom-78e9d86a23c6b7f3.rmeta: C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\lib.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\util.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error_impls.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\js.rs
+
+C:\Users\llalma\Documents\dataAnalyticsPlatform\my-app\rustFunctions\Grid\target\wasm32-unknown-unknown\release\deps\libgetrandom-78e9d86a23c6b7f3.rlib: C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\lib.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\util.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error_impls.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\js.rs
+
+C:\Users\llalma\Documents\dataAnalyticsPlatform\my-app\rustFunctions\Grid\target\wasm32-unknown-unknown\release\deps\getrandom-78e9d86a23c6b7f3.d: C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\lib.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\util.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error_impls.rs C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\js.rs
+
+C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\lib.rs:
+C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error.rs:
+C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\util.rs:
+C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\error_impls.rs:
+C:\Users\llalma\.cargo\registry\src\github.com-1ecc6299db9ec823\getrandom-0.2.8\src\js.rs:
