@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount} from "svelte";
-    import init, {Grid, Coordinate} from '../../../RustFunctions/Grid/pkg/Grid';
+    import init, {Coordinate, Grid} from '../../../RustFunctions/Grid/pkg/Grid';
 
     let data, drag_start, drag_end
     let currentDragLoc;
@@ -65,10 +65,22 @@
         dragBool = false
     }
 
+    function copy(){
+        navigator.clipboard.writeText(data.get_csv_string(drag_start, drag_end))
+    }
+
+    function paste(){
+        navigator.clipboard.readText().then(res => {
+            data.paste(currentDragLoc, res)
+            data = data
+        })
+    }
+
+
     function to_csv(){
         const fileName = "test.csv"
 
-        const blob = new Blob([data.to_csv()], {type: 'text/plain'});
+        const blob = new Blob([data.get_csv_string(new Coordinate(-1,-1), new Coordinate(-1,-1))], {type: 'text/plain'});
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = fileName;
@@ -94,6 +106,8 @@
 <div>
     <button on:click={getInfo}>Get Info</button>
     <button on:click={to_csv}>To CSV</button>
+    <button on:click={copy}>Copy</button>
+    <button on:click={paste}>Paste</button>
     <button on:click={delete_handle}>Delete</button>
 </div>
 
@@ -120,7 +134,7 @@
                                             && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
                                             && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
 
-                                             ? 'highlight-cell' : 'cell'}" on:click={()=>console.log(data.get_cell(new Coordinate(i,j)))} on:change={()=>onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)} value={data.get_cell(new Coordinate(i,j))} >
+                                             ? 'highlight-cell' : 'cell'}" on:change={()=>onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)} value={data.get_cell(new Coordinate(i,j))} >
             {/each}
         {/each}
     </div>

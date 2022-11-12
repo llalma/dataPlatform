@@ -1,8 +1,9 @@
 extern crate wasm_bindgen;
 
-use wasm_bindgen::prelude::*;
-use web_sys::console; //Get console log
+//Get console log
 use std::cmp;
+use wasm_bindgen::prelude::*;
+use web_sys::console;
 
 // Polars
 // use polars_core::prelude::*;
@@ -126,17 +127,46 @@ impl Grid {
         }
     }
 
-    pub fn to_csv(&self) -> String{
-        // 2D vector array of cells to csv string
+    pub fn get_csv_string(&self, start: &Coordinate::Coordinate, end: &Coordinate::Coordinate) -> String{
+
+        let mut start_coord = start.clone();
+        let mut end_coord = end.clone();
+
+        //Select the whole dataframe if coordinates are not set
+        if start_coord.is_blank() || end_coord.is_blank(){
+            start_coord = Coordinate::Coordinate::new(0, 0).clone();
+            end_coord = Coordinate::Coordinate::new(self.height.clone(), self.width.clone()).clone();
+        }
+
+        //Get corners of highlighted box
+        let min_x = cmp::min(&start_coord.x(), &end_coord.x()).clone();
+        let max_x = cmp::max(&start_coord.x(), &end_coord.x()).clone();
+        let min_y = cmp::min(&start_coord.y(), &end_coord.y()).clone();
+        let max_y = cmp::max(&start_coord.y(), &end_coord.y()).clone();
+
         return self.data
             .clone()
             .into_iter()
-            .map(|r| r
+            .enumerate()
+            .filter(|&(row_index, _)| row_index >= min_x && row_index <= max_x )
+            .map(|(_, r)| r
                 .clone()
                 .into_iter()
-                .map(|c| format!("\"{0}\"", c.get_data()))
+                .enumerate()
+                .filter(|&(column_index, _)| column_index >= min_y && column_index <= max_y )
+                .map(|(_, c)| format!("\"{0}\"", c.get_data()))
                 .collect::<Vec<String>>().join(","))
             .collect::<Vec<String>>().join("\n");
+    }
+
+    pub fn paste(&mut self, start: &Coordinate::Coordinate, data: String){
+        // Pastes from top left corner if highlighted area it is ignored and just pastest anyway even outside of highlighted arewa
+
+        for (x, row_data) in data.split("\n").enumerate(){
+            for (y, column_data) in row_data.split(",").enumerate() {
+                self.data[&start.x() + x][&start.y() + y].set_data(Cell::DataType::String, column_data.to_string().replace("\"", ""));
+            }
+        }
     }
 }
 
