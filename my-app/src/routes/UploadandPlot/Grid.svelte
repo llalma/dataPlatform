@@ -18,13 +18,17 @@
         })
     });
 
+    function resize(){
+        data.resize(grid[0], grid[1])
+        data=data
+    }
 
     function onHeaderUpdate(e, i){
-        data.set_header(i, e.target.value)
+        data.set_header(i, e.target.innerText)
     }
 
     function onCellUpdate(e, x, y){
-        data.set_cell(new Coordinate(x, y), e.target.value)
+        data.set_cell(new Coordinate(x, y), e.target.innerText)
     }
 
     function getInfo(){
@@ -76,17 +80,16 @@
         })
     }
 
-
     function to_csv(){
         const fileName = "test.csv"
 
-        const blob = new Blob([data.get_csv_string(new Coordinate(-1,-1), new Coordinate(-1,-1))], {type: 'text/plain'});
+        const blob = new Blob([data.get_csv_export(new Coordinate(0,0), new Coordinate(data.width, data.height))], {type: 'text/plain'});
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = fileName;
         link.href = url;
         link.click();
-        URL.revokeObjectURL(url); // Object URLs should be revoked after use
+        URL.revokeObjectURL(url);
     }
 
     function delete_handle(){
@@ -98,8 +101,8 @@
 
 <!--Adjust number of rows and columns in datatable-->
 <div>
-    rows: <input type="number" bind:value={grid[0]} on:change={data.update_height_width(grid[0], grid[1])}>
-    columns: <input type="number" bind:value={grid[1]} on:change={data.update_height_width(grid[0], grid[1])}>
+    rows: <input type="number" min="0" bind:value={grid[0]} on:change={resize(grid[0], grid[1])} >
+    columns: <input type="number" min="0" bind:value={grid[1]} on:change={resize(grid[0], grid[1])} >
 </div>
 
 <!--Div for buttons-->
@@ -114,38 +117,43 @@
 {#if !data}
     Loading..
 {:else}
-    <!--Create grid div-->
-    <div class="grid" style="grid-template-rows: repeat({grid[0]}, auto); grid-template-columns:repeat({grid[1]}, auto)">
-        <!--    Display each header in the grid-->
-        {#each {length: grid[1]} as _, i (i)}
-            <input type="text" class="header" on:change={()=>onHeaderUpdate(event, i)} value={data.get_header(i)}>
-        {/each}
 
-        <!--    Display each cell in the grid-->
-        {#each {length: grid[0]} as _, i (i)}
-            {#each {length: grid[1]} as _, j (j)}
-                <input type="text" class="{(dragBool &&
-                                            (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
-                                            && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
-                                            && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
-
-                                            ||
-                                            (keepHighlightedBool
-                                            && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
-                                            && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
-
-                                             ? 'highlight-cell' : 'cell'}" on:change={()=>onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)} value={data.get_cell(new Coordinate(i,j))} >
+    <table class="grid">
+        <tr>
+            {#each {length: data.width} as _, i (i)}
+                <th contenteditable="true" class="header" on:blur={onHeaderUpdate(event, i)}>{data.get_header(i)}</th>
             {/each}
-        {/each}
-    </div>
+        </tr>
 
+        {#each {length: data.height} as _, i (i)}
+            <tr>
+            {#each {length: data.width} as _, j (j)}
+                <td contenteditable="true" class="{(dragBool &&
+                                        (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
+                                        && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
+                                        && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
+
+                                        ||
+                                        (keepHighlightedBool
+                                        && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
+                                        && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
+
+                                         ? 'highlight-cell' : 'cell'}" on:blur={onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)} >{data.get_cell(new Coordinate(i,j))}</td>
+            {/each}
+            </tr>
+        {/each}
+    </table>
 {/if}
 
 
 <style>
     /*Grid for excel*/
     .grid{
-        display: grid;
+        display: table;
+        width: 100%;
+        border-spacing:0;
+        border-collapse: collapse;
+        border: 0.01px solid black;
     }
 
     .header{
@@ -155,14 +163,18 @@
 
     /*Individual cell for each grid*/
     .cell{
-        border: 1px solid rgba(0, 0, 0, 0.8);
+        border: 0.01px solid rgba(0, 0, 0, 0.8);
         text-align: center;
+        width: 75px;
+        border-collapse:collapse
     }
 
     .highlight-cell{
-        border: 1px solid rgba(0, 0, 0, 0.8);
+        border: 0.01px solid rgba(0, 0, 0, 0.8);
         text-align: center;
         background-color: red;
+        width: 75px;
+        border-collapse:collapse
     }
 
 </style>

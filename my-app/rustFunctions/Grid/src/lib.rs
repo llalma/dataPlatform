@@ -17,6 +17,8 @@ use web_sys::console;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 
+
+
 /*
 Structs
 */
@@ -40,23 +42,35 @@ impl Grid {
         }
     }
 
-    pub fn update_height_width( &mut self, size_x: usize, size_y: usize){
+    /// Resize the grid to the new specified size
+    pub fn resize(&mut self, size_x: usize, size_y: usize){
 
         // Increase Y vectors
-        if (&size_y - &self.width) > 0{
-            self.width =  size_y.clone();
-            for x in 0..&self.width+1 {
-                self.data[x].resize(size_y.clone(), Cell::Cell::new());
-            }
+        for x in 0..self.height.clone() {
+            self.data[x].resize(size_y.clone(), Cell::Cell::new());
         }
+
+        //Resize headers and set newly added columns to default header
+        self.headers.resize(size_y, "".to_string());
+        self.headers = self.headers
+                        .clone()
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, v)| {
+                            if i >= self.width {
+                                format!("Header_{0}", i.to_string())
+                            }else{
+                                v
+                            }
+                        }).collect();
 
         // Increase X vectors
-        if ( &size_x - &self.height) > 0{
-            self.height = size_x.clone();
-            let x = vec![Cell::Cell::new(); size_y];
-            self.data.resize(size_x, x);
-        }
+        let temp_data = vec![Cell::Cell::new(); size_y.clone()];
+        self.data.resize(size_x.clone(), temp_data);
 
+        //Set recorded sizes
+        self.width =  size_y.clone();
+        self.height = size_x.clone();
     }
 
     #[wasm_bindgen(getter)]
@@ -80,7 +94,7 @@ impl Grid {
         self.data[coord.x()][coord.y()].set_data(Cell::DataType::String, data)
     }
 
-    pub fn get_cell(&self, coord:Coordinate::Coordinate) -> String{
+    pub fn get_cell(&self, coord: &Coordinate::Coordinate) -> String{
         return self.data[coord.x()][coord.y()].get_data()
     }
 
@@ -129,14 +143,10 @@ impl Grid {
 
     pub fn get_csv_string(&self, start: &Coordinate::Coordinate, end: &Coordinate::Coordinate) -> String{
 
-        let mut start_coord = start.clone();
-        let mut end_coord = end.clone();
+        let start_coord = start.clone();
+        let end_coord = end.clone();
 
-        //Select the whole dataframe if coordinates are not set
-        if start_coord.is_blank() || end_coord.is_blank(){
-            start_coord = Coordinate::Coordinate::new(0, 0).clone();
-            end_coord = Coordinate::Coordinate::new(self.height.clone(), self.width.clone()).clone();
-        }
+        // TODO Handling for non full size exports
 
         //Get corners of highlighted box
         let min_x = cmp::min(&start_coord.x(), &end_coord.x()).clone();
@@ -159,6 +169,27 @@ impl Grid {
             .collect::<Vec<String>>().join("\n");
     }
 
+    pub fn get_csv_export(&self, start: &Coordinate::Coordinate, end: &Coordinate::Coordinate) -> String{
+
+        let start_coord = start.clone();
+        let end_coord = end.clone();
+
+        // TODO Handling for non full size exports
+
+        let min_y = cmp::min(&start_coord.y(), &end_coord.y()).clone();
+        let max_y = cmp::max(&start_coord.y(), &end_coord.y()).clone();
+
+        let header_string: String = self.headers
+                                    .clone()
+                                    .into_iter()
+                                    .enumerate()
+                                    .filter(|&(column_index, _)| column_index >= min_y && column_index <= max_y )
+                                    .map(|(_, r)| r)
+                                    .collect::<Vec<String>>().join(",");
+
+        return format!("{0}\n{1}", header_string, self.get_csv_string(start, end))
+
+    }
     pub fn paste(&mut self, start: &Coordinate::Coordinate, data: String){
         // Pastes from top left corner if highlighted area it is ignored and just pastest anyway even outside of highlighted arewa
 
