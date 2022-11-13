@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount} from "svelte";
-    import init, {Coordinate, Grid} from '../../../RustFunctions/Grid/pkg/Grid';
+    import init, {Coordinate, Grid} from '../../../rustFunctions/grid/pkg/Grid';
 
     const visRowsDiff = 20
     const visColumnsDiff = 10
