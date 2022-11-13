@@ -10,7 +10,7 @@
     let dragBool = false;
     let keepHighlightedBool = false;
 
-    let grid = [10, 10];
+    let grid = [30, 10];
     let visRows = 0;
     let visColumns = 0;
 
@@ -34,6 +34,7 @@
 
     function onCellUpdate(e, x, y){
         data.set_cell(new Coordinate(x, y), e.target.innerText)
+        data=data
     }
 
     function getInfo(){
@@ -108,13 +109,29 @@
     }
 
     const table_scroll_handle = e => {
-        //Increment and decrement scroll by 1 row at a time
-        visRows += (e.deltaY > 0) ? (1) : (-1)
 
-        //Handling for min and max values
-        visRows = (visRows+visRowsDiff > data.height) ? (data.height-visRowsDiff) : (visRows)
-        visRows = (visRows < 0) ? (0) : (visRows)
+        if (e.shiftKey){
+            //Horizontal scrolling - If shiftKey held down
+
+            //Increment and decrement scroll by 1 row at a time
+            visColumns += (e.deltaY > 0) ? (1) : (-1)
+
+            //Handling for min and max values
+            visColumns = (visColumns + visColumnsDiff > data.width) ? (data.width - visColumnsDiff) : (visColumns)
+            visColumns = (visColumns < 0) ? (0) : (visColumns)
+
+        } else {
+            //Vertical Scrolling
+
+            //Increment and decrement scroll by 1 row at a time
+            visRows += (e.deltaY > 0) ? (1) : (-1)
+
+            //Handling for min and max values
+            visRows = (visRows + visRowsDiff > data.height) ? (data.height - visRowsDiff) : (visRows)
+            visRows = (visRows < 0) ? (0) : (visRows)
+        }
     };
+
 </script>
 
 <!--Adjust number of rows and columns in datatable
@@ -145,39 +162,30 @@ and show current postions being displated-->
 
         <!--Insert Header rows and cells-->
         <tr>
-            {#each {length: data.width} as _, j (j)}
-                {#if j >= visColumns && j < visColumns + visColumnsDiff}
-                    <th contenteditable="true" class="header" on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
-                {/if}
+            {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
+                <th contenteditable="true" class="header" on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
             {/each}
         </tr>
 
         <!--Insert data cells-->
-        {#each {length: data.height} as _, i (i)}
-            {#if i >= visRows && i <visRows+visRowsDiff}
+        {#each Array.from(Array(Math.min(visRows+visRowsDiff, data.height)).keys()).slice(visRows) as i}
                 <tr>
-                {#each {length: data.width} as _, j (j)}
+                {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
+                    <td contenteditable="true" class="{(dragBool &&
+                                            (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
+                                            && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
+                                            && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
 
-                    {#if j >= visColumns && j < visColumns + visColumnsDiff}
+                                            ||
+                                            (keepHighlightedBool
+                                            && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
+                                            && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
 
-                        <td contenteditable="true" class="{(dragBool &&
-                                                (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
-                                                && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
-                                                && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
+                                             ? 'highlight-cell' : 'cell'}" on:click={console.log(i)} on:blur={onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)}>{data.get_cell(new Coordinate(i,j))}</td>
 
-                                                ||
-                                                (keepHighlightedBool
-                                                && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
-                                                && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
-
-                                                 ? 'highlight-cell' : 'cell'}" on:blur={onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)}>{data.get_cell(new Coordinate(i,j))}</td>
-
-                    {/if}
                 {/each}
                 </tr>
-            {/if}
         {/each}
-
     </table>
 {/if}
 
