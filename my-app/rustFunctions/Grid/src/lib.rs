@@ -158,12 +158,12 @@ impl Grid {
             .clone()
             .into_iter()
             .enumerate()
-            .filter(|&(row_index, _)| row_index >= min_x && row_index <= max_x )
+            .filter(|&(row_index, _)| row_index >= min_y && row_index < max_y )
             .map(|(_, r)| r
                 .clone()
                 .into_iter()
                 .enumerate()
-                .filter(|&(column_index, _)| column_index >= min_y && column_index <= max_y )
+                .filter(|&(column_index, _)| column_index >= min_x && column_index < max_x )
                 .map(|(_, c)| format!("\"{0}\"", c.get_data()))
                 .collect::<Vec<String>>().join(","))
             .collect::<Vec<String>>().join("\n");
