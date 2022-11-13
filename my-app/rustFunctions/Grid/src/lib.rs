@@ -86,6 +86,10 @@ impl Grid {
         self.headers[index] = data
     }
 
+    pub fn set_headers(&mut self, data: String){
+        self.headers = data.split(",").map(|h| h.to_string()).collect();
+    }
+
     pub fn get_header(&self, index: usize) -> String {
         return format!("{0}", self.headers[index].to_string())
     }
@@ -190,6 +194,7 @@ impl Grid {
         return format!("{0}\n{1}", header_string, self.get_csv_string(start, end))
 
     }
+
     pub fn paste(&mut self, start: &Coordinate::Coordinate, data: String){
         // Pastes from top left corner if highlighted area it is ignored and just pastest anyway even outside of highlighted arewa
 
@@ -199,5 +204,6 @@ impl Grid {
             }
         }
     }
+
 }
 

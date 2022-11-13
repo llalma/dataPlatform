@@ -108,6 +108,27 @@
         keepHighlightedBool = false
     }
 
+    function upload_handle(e){
+        const reader = new FileReader();
+        reader.readAsText(e.target.files[0])
+        reader.onload = () => {
+            let txt = reader.result;
+            console.log(txt);
+
+            //Update the headers
+            data.set_headers(txt.split("\n")[0])
+
+            //Update the cell data
+            data.paste(new Coordinate(0,0), txt.split("\n").slice(1).join("\n"))
+
+            //Resize the grid to the needed size
+            grid[0] = txt.split("\n").length
+            grid[1] = txt.split("\n")[0].split(",").length
+            resize()
+
+        };
+    }
+
     const table_scroll_handle = e => {
 
         if (e.shiftKey){
@@ -152,6 +173,7 @@ and show current postions being displated-->
     <button on:click={copy}>Copy</button>
     <button on:click={paste}>Paste</button>
     <button on:click={delete_handle}>Delete</button>
+    <input type="file" accept=".csv" on:change={(e)=>upload_handle(e)}>
 </div>
 
 <!--Statement to ensure display does not happened before data is laoded-->
@@ -162,6 +184,7 @@ and show current postions being displated-->
 
         <!--Insert Header rows and cells-->
         <tr>
+            <th class="index-cell">Index</th>
             {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
                 <th contenteditable="true" class="header" on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
             {/each}
@@ -170,6 +193,9 @@ and show current postions being displated-->
         <!--Insert data cells-->
         {#each Array.from(Array(Math.min(visRows+visRowsDiff, data.height)).keys()).slice(visRows) as i}
                 <tr>
+                    <!--Index Column-->
+                    <td class="index-cell">{i}</td>
+
                 {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
                     <td contenteditable="true" class="{(dragBool &&
                                             (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
@@ -202,6 +228,15 @@ and show current postions being displated-->
     .header{
         border: 5px solid rgba(0, 0, 0, 0.8);
         text-align: center;
+    }
+
+    /*Index cell*/
+    .index-cell{
+        border: 0.01px solid rgba(0, 0, 0, 0.8);
+        text-align: center;
+        width: 5px;
+        border-collapse:collapse;
+        border-right: 5px solid rgba(0, 0, 0, 0.8);
     }
 
     /*Individual cell for each grid*/
