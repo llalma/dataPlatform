@@ -1,5 +1,5 @@
 [package]
-name = "Grid"
+name = "grid"
 version = "0.1.0"
 authors = ["llalma <lhulsmanbenson@gmail.com>"]
 edition = "2018"
@@ -12,6 +12,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
+wasm-bindgen-test = "*"
 
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
@@ -35,6 +36,9 @@ web-sys = { version = "0.3.39", features = ["console"] }
 #polars-core = "*"
 #polars-lazy = "*"
 #getrandom = { version = "*", features = ["js"] }
+
+#[dev-dependencies]
+#wasm-bindgen-test = "*"
 
 
 [profile.release]

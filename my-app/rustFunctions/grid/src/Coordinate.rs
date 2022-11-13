@@ -34,8 +34,8 @@ impl Coordinate {
         return self.x.clone() as i32 == -1;
     }
 
-    fn to_string(&self) -> String{
-        //Get coordinate values in a simple string
-        return format!("x: {0}, y: {1}", &self.x, &self.y)
-    }
+    // fn to_string(&self) -> String{
+    //     //Get coordinate values in a simple string
+    //     return format!("x: {0}, y: {1}", &self.x, &self.y)
+    // }
 }

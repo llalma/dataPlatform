@@ -3,14 +3,17 @@ extern crate wasm_bindgen;
 //Get console log
 use std::cmp;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
+
+// use web_sys::console;
 
 // Polars
 // use polars_core::prelude::*;
 // use polars_lazy::prelude::*;
 
 //Created Packages
+#[allow(non_snake_case)]
 #[path = "Cell.rs"] mod Cell;
+#[allow(non_snake_case)]
 #[path = "Coordinate.rs"] mod Coordinate;
 
 #[global_allocator]
@@ -206,4 +209,3 @@ impl Grid {
     }
 
 }
-
