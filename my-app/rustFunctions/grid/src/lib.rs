@@ -90,7 +90,7 @@ impl Grid {
     }
 
     pub fn set_headers(&mut self, data: String){
-        self.headers = data.split(",").map(|h| h.to_string()).collect();
+        data.split(",").enumerate().for_each(|(i, h)| self.set_header(i, h.to_string()));
     }
 
     pub fn get_header(&self, index: usize) -> String {
@@ -165,12 +165,12 @@ impl Grid {
             .clone()
             .into_iter()
             .enumerate()
-            .filter(|&(row_index, _)| row_index >= min_y && row_index < max_y )
+            .filter(|&(row_index, _)| row_index >= min_x && row_index <= max_x )
             .map(|(_, r)| r
                 .clone()
                 .into_iter()
                 .enumerate()
-                .filter(|&(column_index, _)| column_index >= min_x && column_index < max_x )
+                .filter(|&(column_index, _)| column_index >= min_y && column_index <= max_y )
                 .map(|(_, c)| format!("\"{0}\"", c.get_data()))
                 .collect::<Vec<String>>().join(","))
             .collect::<Vec<String>>().join("\n");
@@ -207,5 +207,115 @@ impl Grid {
             }
         }
     }
+}
+
+mod tests{
+    use wasm_bindgen_test::*;
+
+    use crate::Coordinate;
+
+    use super::Grid;
+
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    #[wasm_bindgen_test]
+    pub fn test_get_header_empty() {
+        let expected: String = "Header_0".to_string();
+        let test_grid = Grid::new(1,1);
+
+        assert_eq!(test_grid.get_header(0), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_set_header() {
+        let expected: String = "test Value".to_string();
+        let mut test_grid = Grid::new(1,6);
+
+        test_grid.set_header(5, expected.clone());
+
+        assert_eq!(test_grid.get_header(5), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_set_headers() {
+        let expected: String = "test,Value,Header".to_string();
+        let mut test_grid = Grid::new(1,3);
+
+        test_grid.set_headers(expected.clone());
+
+        assert_eq!( (0..test_grid.width()).into_iter().map(|h| test_grid.get_header(h)).collect::<Vec<String>>(), expected.split(",").map(|s| s.to_string()).collect::<Vec<String>>());
+    }
+
+
+
+    #[wasm_bindgen_test]
+    pub fn test_height() {
+        let expected: usize = 8;
+        let test_grid = Grid::new(expected.clone(),4);
+
+        assert_eq!(test_grid.height(), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_width() {
+        let expected: usize = 420;
+        let test_grid = Grid::new(54,expected.clone());
+
+        assert_eq!(test_grid.width(), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_resize() {
+        let expected: Vec<usize> = vec![32,64];
+        let mut test_grid = Grid::new(1,1);
+
+        test_grid.resize(expected[0], expected[1]);
+
+        assert_eq!(vec![test_grid.height(), test_grid.width()], expected);
+    }
+
+
+
+    #[wasm_bindgen_test]
+    pub fn test_get_cell_empty() {
+        let expected: String = "".to_string();
+        let test_grid = Grid::new(1,1);
+
+        assert_eq!(test_grid.get_cell(&Coordinate::Coordinate::new(0,0)), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_set_cell() {
+        let expected: String = "test Value".to_string();
+        let mut test_grid = Grid::new(1,1);
+
+        test_grid.set_cell(Coordinate::Coordinate::new(0,0), expected.clone());
+
+        assert_eq!(test_grid.get_cell(&Coordinate::Coordinate::new(0,0)), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_empty_to_string() {
+
+        let test_grid = Grid::new(2,3);
+
+        let expected: String = ["\"\",\"\",\"\"",
+                                "\"\",\"\",\"\""].join("\n");
+
+        assert_eq!(test_grid.get_csv_string(&Coordinate::Coordinate::new(0,0), &Coordinate::Coordinate::new(2,3)), expected);
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_non_empty_to_string() {
+        let mut test_grid = Grid::new(1,6);
+        test_grid.set_cell(Coordinate::Coordinate::new(0,2), "test".to_string());
+        test_grid.set_cell(Coordinate::Coordinate::new(0,5), "hi".to_string());
+
+
+        let expected: String = ["\"\",\"\",\"test\",\"\",\"\",\"hi\""].join("\n");
+
+        assert_eq!(test_grid.get_csv_string(&Coordinate::Coordinate::new(0,0), &Coordinate::Coordinate::new(0,6)), expected);
+    }
+
 
 }

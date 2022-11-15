@@ -47,7 +47,7 @@ impl Cell {
     }
 }
 
-mod test{
+mod tests{
     use wasm_bindgen_test::*;
 
     use super::Cell;
