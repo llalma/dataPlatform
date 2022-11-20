@@ -14,6 +14,8 @@
     let visRows = 0;
     let visColumns = 0;
 
+    let test = -1;
+
 
     //Mount Rust WASM Function
     onMount(async () => {
@@ -153,6 +155,12 @@
         }
     };
 
+    function filter(){
+        data.set_visible(test, false);
+        console.log(data.get_visible(test))
+        data=data
+    }
+
 </script>
 
 <!--Adjust number of rows and columns in datatable
@@ -176,6 +184,11 @@ and show current postions being displated-->
     <input type="file" accept=".csv" on:change={(e)=>upload_handle(e)}>
 </div>
 
+<div>
+    <input type="number" bind:value={test}>
+    <button on:click={filter}>filter</button>
+</div>
+
 <!--Statement to ensure display does not happened before data is laoded-->
 {#if !data}
     Loading..
@@ -192,25 +205,28 @@ and show current postions being displated-->
 
         <!--Insert data cells-->
         {#each Array.from(Array(Math.min(visRows+visRowsDiff, data.height)).keys()).slice(visRows) as i}
+            {#if data.get_visible(i)}
                 <tr>
                     <!--Index Column-->
                     <td class="index-cell">{i}</td>
 
                 {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
-                    <td contenteditable="true" class="{(dragBool &&
+                    <td contenteditable="true" class="{((dragBool &&
                                             (drag_start.x !== currentDragLoc.x || drag_start.y !== currentDragLoc.y)
                                             && Math.min(drag_start.x, currentDragLoc.x)<=i && Math.max(currentDragLoc.x, drag_start.x)>=i
                                             && Math.min(drag_start.y, currentDragLoc.y)<=j && Math.max(currentDragLoc.y, drag_start.y)>=j)
-
                                             ||
                                             (keepHighlightedBool
                                             && Math.min(drag_start.x, drag_end.x)<=i && Math.max(drag_end.x, drag_start.x)>=i
-                                            && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j)
+                                            && Math.min(drag_start.y, drag_end.y)<=j && Math.max(drag_end.y, drag_start.y)>=j))
+
+
 
                                              ? 'highlight-cell' : 'cell'}" on:click={console.log(i)} on:blur={onCellUpdate(event, i,j)} on:mousedown={start_drag(event, i, j)} on:mouseup={end_drag(event, i, j)} on:mouseover={mid_drag(event, i, j)}>{data.get_cell(new Coordinate(i,j))}</td>
 
                 {/each}
                 </tr>
+            {/if}
         {/each}
     </table>
 {/if}
