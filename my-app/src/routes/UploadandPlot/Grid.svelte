@@ -1,5 +1,6 @@
 <script lang="ts">
     import {onMount} from "svelte";
+    import Modal, {getModal} from './Modal.svelte'
     import init, {Coordinate, Grid} from '../../../rustFunctions/grid/pkg/Grid';
 
     const visRowsDiff = 20
@@ -14,7 +15,13 @@
     let visRows = 0;
     let visColumns = 0;
 
+    //For filtering
     let test = -1;
+
+    //For modal
+    let filter_column = ''
+    let filter_values = []
+    let checked_filters = []
 
 
     //Mount Rust WASM Function
@@ -156,14 +163,36 @@
     };
 
     //TODO implement filter in frontend
-    function filter(){
-        data.set_visible(test, false);
-        console.log(data.get_visible(test))
+    function filter(filter_column, filter_values){
+        data.filter(filter_column, filter_values)
+
+        console.log(filter_column)
+        console.log(filter_values)
+
         data=data
     }
 
     function get_filter_values(header_value){
-        console.log(data.get_filterable_values(header_value))
+        filter_column = header_value
+        filter_values = data.get_filterable_values(header_value)
+        checked_filters = new Array(filter_values.length).fill(true)
+        getModal("filter_modal").open()
+    }
+
+    function close_filter_modal(){
+        //Close modal
+        getModal("filter_modal").close()
+
+        //TODO can probbably make this nicer
+        let filters_to_keep = []
+        for (let i =0; i<filter_values.length; i++){
+            if(checked_filters[i] === true){
+                filters_to_keep.push(filter_values[i])
+            }
+        }
+
+        //Filter depending on selected values
+        filter(filter_column, filters_to_keep)
     }
 
 </script>
@@ -235,6 +264,19 @@ and show current postions being displated-->
         {/each}
     </table>
 {/if}
+
+<!--Filter selection Popup-->
+<Modal id="filter_modal">
+    <b>{filter_column}</b>
+    <ul style="list-style: none">
+        {#each filter_values as val, index}
+            <li>
+                <input type="checkbox" bind:checked={checked_filters[index]}>{val}
+            </li>
+        {/each}
+    </ul>
+    <button on:click={close_filter_modal}>Accept</button>
+</Modal>
 
 <style>
     /*Grid for excel*/
