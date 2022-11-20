@@ -155,10 +155,15 @@
         }
     };
 
+    //TODO implement filter in frontend
     function filter(){
         data.set_visible(test, false);
         console.log(data.get_visible(test))
         data=data
+    }
+
+    function get_filter_values(header_value){
+        console.log(data.get_filterable_values(header_value))
     }
 
 </script>
@@ -199,7 +204,7 @@ and show current postions being displated-->
         <tr>
             <th class="index-cell">Index</th>
             {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
-                <th contenteditable="true" class="header" on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
+                <th contenteditable="true" class="header" on:click={() => get_filter_values(data.get_header(j))} on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
             {/each}
         </tr>
 

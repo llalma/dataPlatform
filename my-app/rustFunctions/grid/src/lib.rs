@@ -1,5 +1,6 @@
 extern crate wasm_bindgen;
 
+use itertools::Itertools;
 use js_sys::Array;
 //Get console log
 use std::cmp;
@@ -240,6 +241,36 @@ impl Grid {
             .for_each(|r| self.set_visible(r, false));
 
     }
+
+    pub fn get_filterable_values(&self, filter_column: String) -> Array{
+        let mut possible_filtered_values: Vec<String> = self.data
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter(|(row_index, _)| self.get_visible(row_index.clone()))
+            .map(|(_, row)|
+                row.into_iter()
+                    .enumerate()
+                    .filter(|(column_index, _)| self.headers[column_index.clone()].clone() == filter_column)
+                    .map(|(_, cell)| cell.get_data())
+                    .collect::<Vec<String>>()
+            ).flatten()
+            .unique()
+            .collect();
+
+        //Delete duplicates and sort values
+        possible_filtered_values.sort();
+
+        return Self::create_array(possible_filtered_values)
+    }
+
+    fn create_array(input: Vec<String>) -> Array{
+        let arr = Array::new();
+        for (i,v) in input.into_iter().enumerate(){
+            arr.set(i as u32, JsValue::from_str(&v))
+        }
+        return arr;
+    }
 }
 
 mod tests {
@@ -465,5 +496,57 @@ mod tests {
 
         //Export filtered results and compare
         assert_eq!(test_grid.get_csv_string(&Coordinate::Coordinate::new(0, 0), &Coordinate::Coordinate::new(3, 1)), expected)
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_get_filterable_values() {
+        let mut test_grid = Grid::new(4, 2);
+
+        //Set headers
+        let column_headers = "x,y";
+        test_grid.set_headers(column_headers.to_string());
+
+        //Set data
+        let paste_insert = ["2,2",
+            "1,4",
+            "1,6",
+            "7,8"].join("\n").to_string();
+        test_grid.paste(&Coordinate::Coordinate::new(0, 0), paste_insert);
+
+        //Expected value
+        let expected = vec!["1", "2", "7"];
+
+        //Export filtered results and compare
+        let returned: Vec<String> = test_grid.get_filterable_values("x".to_string()).iter().map(|v| v.as_string().unwrap()).collect();
+        assert_eq!(expected, returned)
+    }
+
+    #[wasm_bindgen_test]
+    pub fn test_get_filterable_values_when_filtered() {
+        let mut test_grid = Grid::new(4, 2);
+
+        //Set headers
+        let column_headers = "x,y";
+        test_grid.set_headers(column_headers.to_string());
+
+        //Set data
+        let paste_insert = ["2,2",
+            "1,4",
+            "1,6",
+            "7,8"].join("\n").to_string();
+        test_grid.paste(&Coordinate::Coordinate::new(0, 0), paste_insert);
+
+        //Filter where "x" == 1
+        let filter_value = js_sys::Array::new();
+        filter_value.set(0, JsValue::from_str("1"));
+        test_grid.filter("x".to_string(), filter_value);
+
+        //Expected value
+        let expected = vec!["4", "6"];
+
+
+        //Export filtered results and compare
+        let returned: Vec<String> = test_grid.get_filterable_values("y".to_string()).iter().map(|v| v.as_string().unwrap()).collect();
+        assert_eq!(expected, returned)
     }
 }
