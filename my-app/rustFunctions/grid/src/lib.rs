@@ -325,8 +325,8 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    pub fn test_visible_rows(){
-        let mut test_grid = Grid::new(2,2);
+    pub fn test_visible_rows() {
+        let mut test_grid = Grid::new(2, 2);
 
         //Test initial value is true
         assert_eq!(test_grid.get_visible(1), true);
@@ -377,7 +377,7 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    pub fn test_get_csv_export(){
+    pub fn test_get_csv_export() {
         let mut test_grid = Grid::new(2, 3);
         test_grid.set_cell(Coordinate::Coordinate::new(0, 2), "test".to_string());
         test_grid.set_cell(Coordinate::Coordinate::new(1, 2), "hi".to_string());
@@ -409,7 +409,7 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    pub fn test_filter_single(){
+    pub fn test_filter_single() {
         let mut test_grid = Grid::new(4, 2);
 
         //Set headers
@@ -418,9 +418,9 @@ mod tests {
 
         //Set data
         let paste_insert = ["2,2",
-                            "1,4",
-                            "1,6",
-                            "7,8"].join("\n").to_string();
+            "1,4",
+            "1,6",
+            "7,8"].join("\n").to_string();
         test_grid.paste(&Coordinate::Coordinate::new(0, 0), paste_insert);
 
         //Filter where "x" == 1
@@ -430,14 +430,40 @@ mod tests {
 
         //Expected value
         let expected = ["\"1\",\"4\"",
-                        "\"1\",\"6\""].join("\n").to_string();
+            "\"1\",\"6\""].join("\n").to_string();
 
         //Export filtered results and compare
         assert_eq!(test_grid.get_csv_string(&Coordinate::Coordinate::new(0, 0), &Coordinate::Coordinate::new(3, 1)), expected)
     }
 
     #[wasm_bindgen_test]
-    pub fn test_filter_multiple(){
+    pub fn test_filter_multiple() {
+        let mut test_grid = Grid::new(4, 2);
 
+        //Set headers}
+        let column_headers = "x,y";
+        test_grid.set_headers(column_headers.to_string());
+
+        //Set data
+        let paste_insert = ["2,2",
+            "1,4",
+            "1,6",
+            "7,8"].join("\n").to_string();
+        test_grid.paste(&Coordinate::Coordinate::new(0, 0), paste_insert);
+
+        //Filter where "x" == 1
+        let filter_value = js_sys::Array::new();
+        filter_value.set(0, JsValue::from_str("1"));
+        test_grid.filter("x".to_string(), filter_value);
+
+        //Filter where "y" = 4
+        let filter_value = js_sys::Array::new();
+        filter_value.set(0, JsValue::from_str("4"));        //Expected value
+        test_grid.filter("y".to_string(), filter_value);
+
+        let expected = ["\"1\",\"4\""].join("\n").to_string();
+
+        //Export filtered results and compare
+        assert_eq!(test_grid.get_csv_string(&Coordinate::Coordinate::new(0, 0), &Coordinate::Coordinate::new(3, 1)), expected)
     }
 }
