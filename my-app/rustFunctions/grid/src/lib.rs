@@ -261,6 +261,11 @@ impl Grid {
         //Delete duplicates and sort values
         possible_filtered_values.sort();
 
+        //Replace "" with NULL
+        possible_filtered_values.iter_mut()
+            .filter(|v| **v=="")
+            .for_each(|v| *v = "NULL".to_string());
+
         return Self::create_array(possible_filtered_values)
     }
 
