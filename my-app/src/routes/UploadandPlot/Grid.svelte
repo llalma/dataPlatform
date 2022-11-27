@@ -14,21 +14,6 @@
     let visRows = 0;
     let visColumns = 0;
 
-    //For filtering
-    let test = -1;
-
-    let filter_column = ''
-    let filter_values = []
-    let checked_filters = []
-    let previously_selected_filters = {}
-
-
-    //For modal
-    // let filter_column = ''
-    // let filter_values = []
-    // let checked_filters = []
-
-
     //Mount Rust WASM Function
     onMount(async () => {
         await init().then(() => {
@@ -190,11 +175,6 @@ and show current postions being displated-->
     <input type="file" accept=".csv" on:change={(e)=>upload_handle(e)}>
 </div>
 
-<div>
-    <input type="number" bind:value={test}>
-    <button on:click={filter}>filter</button>
-</div>
-
 <!--Statement to ensure display does not happened before data is laoded-->
 {#if !data}
     Loading..
@@ -205,7 +185,7 @@ and show current postions being displated-->
         <tr>
             <th class="index-cell">Index</th>
             {#each Array.from(Array(Math.min(visColumns+visColumnsDiff, data.width)).keys()).slice(visColumns) as j}
-                <th contenteditable="true" class="header" on:click={() => get_filter_values(data.get_header(j))} on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
+                <th contenteditable="true" class="header"  on:blur={onHeaderUpdate(event, j)}>{data.get_header(j)}</th>
             {/each}
         </tr>
 
