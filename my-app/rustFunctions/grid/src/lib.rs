@@ -220,55 +220,6 @@ impl Grid {
         }
     }
 
-    pub fn filter(&mut self, filter_column: String, filter_condition: Array){
-        let filtered_index_rows: Vec<usize> = self.data
-            .clone()
-            .into_iter()
-            .enumerate()
-            .map(|(row_index, row)|
-                 row.into_iter()
-                     .enumerate()
-                     .filter(|(column_index, cell)| self.headers[column_index.clone()].clone() == filter_column && !filter_condition.includes(&JsValue::from_str(&cell.get_data()), 0) )  //Filter to the specific column that is being filtered o
-                     .map(|(_, _)| row_index)
-                     .collect::<Vec<usize>>()
-            )
-            .flatten()
-            .collect();
-
-        //Hide the rows which should not be displayed
-        filtered_index_rows
-            .into_iter()
-            .for_each(|r| self.set_visible(r, false));
-
-    }
-
-    pub fn get_filterable_values(&self, filter_column: String) -> Array{
-        let mut possible_filtered_values: Vec<String> = self.data
-            .clone()
-            .into_iter()
-            .enumerate()
-            .filter(|(row_index, _)| self.get_visible(row_index.clone()))
-            .map(|(_, row)|
-                row.into_iter()
-                    .enumerate()
-                    .filter(|(column_index, _)| self.headers[column_index.clone()].clone() == filter_column)
-                    .map(|(_, cell)| cell.get_data())
-                    .collect::<Vec<String>>()
-            ).flatten()
-            .unique()
-            .collect();
-
-        //Delete duplicates and sort values
-        possible_filtered_values.sort();
-
-        //Replace "" with NULL
-        possible_filtered_values.iter_mut()
-            .filter(|v| **v=="")
-            .for_each(|v| *v = "NULL".to_string());
-
-        return Self::create_array(possible_filtered_values)
-    }
-
     fn create_array(input: Vec<String>) -> Array{
         let arr = Array::new();
         for (i,v) in input.into_iter().enumerate(){
