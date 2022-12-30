@@ -32,15 +32,18 @@ wasm-bindgen-futures = '*'
 web-sys = { version = "0.3.39", features = ["console"] }
 
 #Function array inputs
-js-sys = "0.3.59"
+#js-sys = "0.3.59"
 
-itertools = "*"
+#itertools = "*"
 
 #fstrings = "*"
 # For reading CSV
-#polars-core = "*"
+polars-core = {version = "*", features = ["lazy"]}
+polars-io = {version = "*", features = ["csv-file"]}
+
 #polars-lazy = "*"
 #getrandom = { version = "*", features = ["js"] }
+
 
 #[dev-dependencies]
 #wasm-bindgen-test = "*"
