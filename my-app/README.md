@@ -10,6 +10,8 @@ Runproject by excuting the following in powershell from src dir
 
 2nd Command "npm run dev" Runs the server
 
+wasm-pack build .\rustFunctions\Grid\ --target web --debug; npm run dev
+
 
 TESTS:
 
