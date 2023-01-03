@@ -37,6 +37,8 @@ web-sys = { version = "0.3.39", features = ["console", "FileReader", "ProgressEv
 #Function array inputs
 js-sys = "*"
 
+regex = "*"
+
 #polars-io = "*"
 
 #itertools = "*"
@@ -68,7 +70,8 @@ features = [
     "ndarray"
 ]
 default-features = false
-git =  "https://github.com/KivalM/polars.git"
+#git =  "https://github.com/llalma/polars-wasm.git"
+path = "../../../../polars-wasm/polars"
 
 #polars-lazy = "*"
 #getrandom = { version = "*", features = ["js"] }

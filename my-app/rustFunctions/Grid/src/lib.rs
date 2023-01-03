@@ -111,7 +111,12 @@ impl Grid {
 
         let cursor = Cursor::new(shorts);
 
+        use regex::{Regex, RegexBuilder};
 
+        let x = RegexBuilder::new(r"^\s*(true)$|^(false)$")
+            .case_insensitive(true)
+            .build()
+            .unwrap();
 
         let lf = CsvReader::new(cursor).with_ignore_parser_errors(true).finish().unwrap().lazy();
 
