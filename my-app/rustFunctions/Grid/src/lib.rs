@@ -34,8 +34,9 @@ use crate::wasm_bindgen::JsCast;
 
 // use stdweb::web::FileReader;
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+// #[global_allocator]
+// // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+// static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc; 
 
 /*
 Structs
@@ -106,17 +107,10 @@ impl Grid {
         console::log_1(&std::any::type_name::<T>().to_string().into());
     }
 
-    pub fn load_csv(&mut self, buff: &[u8]) -> String {
+    pub fn load_csv(&mut self, buff: &[u8]) -> String{
         let (prefix, shorts, suffix) = unsafe {buff.align_to::<u8>()};
 
         let cursor = Cursor::new(shorts);
-
-        use regex::{Regex, RegexBuilder};
-
-        let x = RegexBuilder::new(r"^\s*(true)$|^(false)$")
-            .case_insensitive(true)
-            .build()
-            .unwrap();
 
         let lf = CsvReader::new(cursor).with_ignore_parser_errors(true).finish().unwrap().lazy();
 
